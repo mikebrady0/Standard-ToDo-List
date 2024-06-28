@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>To Do App</title>
+    <link rel="stylesheet" href="todoapp.css"/>
+</head>
+<body>
+    <div class="container">
+        <h1>To-Do List</h1>
+        <input type="text" id="taskInput" placeholder="Add a new task">
+        <button onclick="addTask()">Add Task</button>
+        <button onclick="clearTasks()">Clear</button>
+        <input type="datetime-local" id="date-time" name="date-time"/>
+        <ul id="taskList">
+        </ul>
+    </div>
+    <script>
+        // Load tasks from localStorage when the page is loaded
+        window.onload = function() {
+            loadTasks();
+        };
+
+        // Function to load tasks from localStorage
+        function loadTasks() {
+            var tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+            tasks.forEach(function(task) {
+                addTaskToDOM(task.content, task.dateTime, false);
+            });
+        }
+
+        // Function to save tasks to localStorage
+        function saveTasks() {
+            var tasks = [];
+            document.querySelectorAll('#taskList li').forEach(function(li) {
+                var taskContent = li.querySelector('.task-content').textContent;
+                var taskDateTime = li.querySelector('.date-time').textContent;
+                tasks.push({ content: taskContent, dateTime: taskDateTime });
+            });
+            localStorage.setItem('tasks', JSON.stringify(tasks));
+        }
+
+        // Function to add a new task
+        function addTask() {
+            var input = document.getElementById("taskInput").value;
+            var dateTimeInput = document.getElementById('date-time').value;
+
+            if (input.trim() !== "") {
+                addTaskToDOM(input, dateTimeInput, true);
+                document.getElementById("taskInput").value = "";
+                document.getElementById('date-time').value = "";
+            }
+        }
+
+        // Function to add a task to the DOM
+        function addTaskToDOM(taskContent, dateTimeInput, save) {
+            var ul = document.getElementById("taskList");
+            var li = document.createElement("li");
+            var remove = document.createElement("button");
+
+            remove.textContent = 'Delete';
+
+            // Create a span for the task content and one for the date-time
+            var taskContentSpan = document.createElement('span');
+            taskContentSpan.textContent = taskContent;
+            taskContentSpan.classList.add('task-content');
+
+            var dateTimeSpan = document.createElement('span');
+            dateTimeSpan.textContent = dateTimeInput;
+            dateTimeSpan.classList.add('date-time');
+
+            // Append the spans and remove button to the li element
+            li.appendChild(taskContentSpan);
+            li.appendChild(dateTimeSpan);
+            li.appendChild(remove);
+            ul.appendChild(li);
+
+            li.classList.add('list-item');
+
+            // Save tasks to localStorage
+            if (save) {
+                saveTasks();
+            }
+
+            // Set up the remove button's onclick event handler
+            remove.onclick = function() {
+                ul.removeChild(li);
+                saveTasks();
+            };
+        }
+
+        // Function to clear all tasks
+        function clearTasks() {
+            var ul = document.getElementById("taskList");
+            ul.innerHTML = "";
+            localStorage.removeItem('tasks');
+        }
+    </script>
+</body>
+</html>
